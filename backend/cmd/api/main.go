@@ -4,9 +4,12 @@ import (
 	"fmt"
 	"link-storage/internal/config"
 	"link-storage/internal/handler/auth_handler"
+	"link-storage/internal/handler/link_handler"
 	"link-storage/internal/middleware"
 	"link-storage/internal/repository/auth_repository"
+	"link-storage/internal/repository/link_repository"
 	"link-storage/internal/service/auth_service"
+	"link-storage/internal/service/link_service"
 	"link-storage/pkg/database"
 	"link-storage/pkg/logger"
 	"log"
@@ -51,9 +54,11 @@ func main() {
 
 	// Repositories
 	authRepo := auth_repository.New(appDb, appLogger)
+	linkRepo := link_repository.New(appDb.Pool, appLogger)
 
 	// Services
 	authService := auth_service.New(authRepo, appLogger, cfg.Secret.Jwt)
+	linkService := link_service.New(linkRepo, appLogger)
 
 	// Server
 	router := chi.NewRouter()
@@ -70,6 +75,7 @@ func main() {
 
 	// Handlers
 	auth_handler.New(router, authService, appLogger)
+	link_handler.New(router, linkService, appLogger)
 
 	// Run
 	runServer := fmt.Sprintf("%s:%d", cfg.Server.Host, cfg.Server.Port)

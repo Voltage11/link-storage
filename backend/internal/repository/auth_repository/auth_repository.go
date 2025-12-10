@@ -17,6 +17,7 @@ type AuthRepository interface {
 	GetRegistrationByToken(ctx context.Context, token string) (*models.Registration, error)
 	GetRegistrationActiveByEmail(ctx context.Context, email string) (*models.Registration, error)
 	CreateUserFromRegistration(ctx context.Context, registration *models.Registration) (*models.User, error)
+	SetUserLastLogin(ctx context.Context, userID int)
 
 	GetSessionByRefreshToken(ctx context.Context, refreshToken string) (*models.Session, error)
 	DeleteSessionByRefreshToken(ctx context.Context, refreshToken string) error
@@ -245,6 +246,19 @@ func (r *authRepository) deactivateUnvalidRegistrationsByEmail(ctx context.Conte
 	}
 
 	return nil
+}
+
+func (r *authRepository) SetUserLastLogin(ctx context.Context, userID int) {
+	op := "auth_repository.SetUserLastLogin"
+
+	query := `
+        UPDATE users
+            SET last_login_at = CURRENT_TIMESTAMP
+        WHERE id = $1
+	`
+	if _, err := r.db.Pool.Exec(ctx, query, userID); err != nil {
+		r.logger.Error(err, op, "user_id", userID)
+	}
 }
 
 // SESSIONS

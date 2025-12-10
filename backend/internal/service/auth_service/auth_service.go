@@ -233,6 +233,8 @@ func (s *authService) Login(ctx context.Context, email, password, ipAddress, use
 		"email", user.Email,
 		"ip", ipAddress)
 
+	go s.repo.SetUserLastLogin(ctx, user.ID)
+
 	return &models.SessionResponse{
 		User:         *user,
 		AccessToken:  accessToken,
