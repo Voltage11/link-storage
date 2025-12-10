@@ -132,10 +132,11 @@ func (r *linkRepository) GetLinkGroupsByUserIDWithPagination(ctx context.Context
 	argsCount := []any{userID}
 
 	if name != "" {
+		searchName := "%" + name + "%"
 		query += fmt.Sprintf(` AND name ILIKE $%d`, len(args)+1)
-		args = append(args, name)
+		args = append(args, searchName)
 		queryCount += fmt.Sprintf(` AND name ILIKE $%d`, len(argsCount)+1)
-		argsCount = append(argsCount, name)
+		argsCount = append(argsCount, searchName)
 	}
 
 	query += ` ORDER BY name`
