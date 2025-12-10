@@ -6,6 +6,7 @@ import (
 	"link-storage/internal/models"
 	"link-storage/internal/repository/link_repository"
 	"link-storage/pkg/logger"
+	"link-storage/pkg/response"
 	"link-storage/pkg/types/app_errors"
 )
 
@@ -14,6 +15,7 @@ type LinkService interface {
 	GetLinkGroupByID(ctc context.Context, id, userID int) (*models.LinkGroup, error)
 	UpdateLinkGroup(ctx context.Context, linkGroupUpdate *models.LinkGroupUpdate) (*models.LinkGroup, error)
 	DeleteLinkGroup(ctx context.Context, id int) error
+	GetLinkGroupsByUserIDWithPagination(ctx context.Context, name string, page, pageSize int) (*response.ListResponse[models.LinkGroup], error)
 }
 
 type linkService struct {
@@ -118,4 +120,16 @@ func (s *linkService) DeleteLinkGroup(ctx context.Context, id int) error {
 	}
 
 	return s.repo.DeleteLinkGroup(ctx, id)
+}
+
+func (s *linkService) GetLinkGroupsByUserIDWithPagination(ctx context.Context, name string, page, pageSize int) (*response.ListResponse[models.LinkGroup], error) {
+	op := "link_service.GetLinkGroupsByUserIDWithPagination"
+
+	user := middleware.GetCurrentUserFromContext(ctx)
+
+	if user == nil {
+		return nil, app_errors.Unauthorized(op)
+	}
+	offset := pageSize * (page - 1)
+	return s.repo.GetLinkGroupsByUserIDWithPagination(ctx, name, user.ID, pageSize, offset)
 }

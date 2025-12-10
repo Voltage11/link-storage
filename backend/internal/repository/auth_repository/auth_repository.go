@@ -251,6 +251,10 @@ func (r *authRepository) deactivateUnvalidRegistrationsByEmail(ctx context.Conte
 func (r *authRepository) SetUserLastLogin(ctx context.Context, userID int) {
 	op := "auth_repository.SetUserLastLogin"
 
+	if ctx == nil {
+		ctx = context.Background()
+	}
+
 	query := `
         UPDATE users
             SET last_login_at = CURRENT_TIMESTAMP

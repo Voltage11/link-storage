@@ -2,7 +2,9 @@ package link_repository
 
 import (
 	"context"
+	"fmt"
 	"link-storage/internal/models"
+	"link-storage/pkg/response"
 	"link-storage/pkg/types/app_errors"
 	"time"
 )
@@ -110,4 +112,95 @@ func (r *linkRepository) DeleteLinkGroup(ctx context.Context, id int) error {
 	}
 
 	return nil
+}
+
+func (r *linkRepository) GetLinkGroupsByUserIDWithPagination(ctx context.Context, name string, userID int, limit, offset int) (*response.ListResponse[models.LinkGroup], error) {
+	op := "link_repository.GetLinkGroupsByUserIDWithPagination"
+
+	query := `
+		SELECT id, user_id, name, description, position, color, created_at, updated_at
+		FROM link_groups
+		WHERE user_id = $1
+	`
+
+	queryCount := `
+		SELECT COUNT(*)
+		FROM link_groups
+		WHERE user_id = $1
+	`
+	args := []any{userID}
+	argsCount := []any{userID}
+
+	if name != "" {
+		query += fmt.Sprintf(` AND name ILIKE $%d`, len(args)+1)
+		args = append(args, name)
+		queryCount += fmt.Sprintf(` AND name ILIKE $%d`, len(argsCount)+1)
+		argsCount = append(argsCount, name)
+	}
+
+	query += ` ORDER BY name`
+
+	if limit > 0 && offset >= 0 {
+		query += fmt.Sprintf(` LIMIT $%d OFFSET $%d`, len(args)+1, len(args)+2)
+		args = append(args, limit, offset)
+	}
+
+	var total int
+
+	// В пределах одной транзакции запросим количество записей и данные
+	tx, err := r.pool.Begin(ctx)
+
+	if err != nil {
+		return nil, app_errors.HandleDBError(err, "получение групп ссылок", op)
+	}
+	defer tx.Rollback(ctx)
+
+	// Получим количество записей
+	if err := tx.QueryRow(ctx, queryCount, argsCount...).Scan(&total); err != nil {
+		return nil, app_errors.HandleDBError(err, "получение групп ссылок", op)
+	}
+
+	// Получим список записей
+	rows, err := tx.Query(ctx, query, args...)
+	if err != nil {
+		return nil, app_errors.HandleDBError(err, "получение групп ссылок", op)
+	}
+	defer rows.Close()
+
+	var linkGroups []*models.LinkGroup
+
+	for rows.Next() {
+		var linkGroup models.LinkGroup
+		if err := rows.Scan(
+			&linkGroup.ID,
+			&linkGroup.UserID,
+			&linkGroup.Name,
+			&linkGroup.Description,
+			&linkGroup.Position,
+			&linkGroup.Color,
+			&linkGroup.CreatedAt,
+			&linkGroup.UpdatedAt); err != nil {
+			return nil, app_errors.HandleDBError(err, "получение групп ссылок", op)
+		}
+		linkGroups = append(linkGroups, &linkGroup)
+	}
+
+	if err := tx.Commit(ctx); err != nil {
+		return nil, app_errors.HandleDBError(err, "получение групп ссылок", op)
+	}
+
+	page := 1
+	totalPages := 1
+	if limit > 0 {
+		page = offset/limit + 1
+		totalPages = (total + limit - 1) / limit
+	}
+
+	return &response.ListResponse[models.LinkGroup]{
+		Data:       linkGroups,
+		Total:      total,
+		Page:       page,
+		PageSize:   limit,
+		TotalPages: totalPages,
+	}, nil
 }

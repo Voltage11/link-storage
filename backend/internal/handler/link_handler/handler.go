@@ -25,5 +25,6 @@ func New(r *chi.Mux, service link_service.LinkService, logger logger.AppLogger) 
 		r.Post("/link-groups", h.linkGroupCreate)
 		r.Put("/link-groups/{id}", h.linkGroupUpdate)
 		r.Delete("/link-groups/{id}", h.linkGroupDelete)
+		r.Get("/link-groups", h.linkGroupList)
 	})
 }

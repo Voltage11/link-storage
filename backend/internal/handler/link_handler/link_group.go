@@ -86,3 +86,16 @@ func (h *linkHandler) linkGroupDelete(w http.ResponseWriter, r *http.Request) {
 
 	response.WriteSuccess(w, nil)
 }
+
+func (h *linkHandler) linkGroupList(w http.ResponseWriter, r *http.Request) {
+	page, pageSize := request.GetPaginateFromRequest(r)
+	name, _ := request.GetQueryValueFromRequest(r, "name")
+
+	linkGroupsResponse, err := h.service.GetLinkGroupsByUserIDWithPagination(r.Context(), name, page, pageSize)
+	if err != nil {
+		response.WriteError(w, err)
+		return
+	}
+
+	response.WriteSuccess(w, linkGroupsResponse)
+}
