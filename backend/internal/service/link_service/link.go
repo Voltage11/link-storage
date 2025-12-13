@@ -126,3 +126,27 @@ func (s *linkService) GetLinksByUserIDWithPagination(ctx context.Context, linkGr
 
 	return s.repo.GetLinksByUserIDWithPagination(ctx, user.ID, linkGroupID, pageSize, offset, name)
 }
+
+func (s *linkService) LinkVisitedPlus(ctx context.Context, linkID int) error {
+	op := "link_service.LinkVisitedPlus"
+
+	user := middleware.GetCurrentUserFromContext(ctx)
+	if user == nil {
+		return app_errors.Unauthorized(op)
+	}
+
+	link, err := s.repo.GetLinkByID(ctx, linkID)
+	if err != nil {
+		return err
+	}
+
+	if link == nil {
+		return app_errors.NotFound("ссылка не найдена", op)
+	}
+
+	if link.UserID != user.ID {
+		return app_errors.NotFound("ссылка не найдена", op)
+	}
+
+	return s.repo.LinkVisitedPlus(ctx, linkID)
+}

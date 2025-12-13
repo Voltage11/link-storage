@@ -200,3 +200,26 @@ func (r *linkRepository) GetLinksByUserIDWithPagination(ctx context.Context, use
 		TotalPages: totalPages,
 	}, nil
 }
+
+func (r *linkRepository) LinkVisitedPlus(ctx context.Context, linkID int) error {
+	op := "link_repository.LinkVisitedPlus"
+
+	query := `
+		UPDATE links
+			SET click_count = COALESCE(click_count, 0) + 1, 
+			last_visited = NOW()
+		WHERE id = $1
+	`
+
+	result, err := r.pool.Exec(ctx, query, linkID)
+	if err != nil {
+		r.logger.Error(err, op)
+		return app_errors.HandleDBError(err, "увеличение счетчика посещений ссылки", op)
+	}
+
+	if result.RowsAffected() == 0 {
+		return app_errors.NotFound("ссылка не найдена", op)
+	}
+
+	return nil
+}

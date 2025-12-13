@@ -71,3 +71,21 @@ func (h *linkHandler) linkList(w http.ResponseWriter, r *http.Request) {
 
 	response.WriteSuccess(w, linkList)
 }
+
+// linkVisitedPlus при каждом посещении ссылки двинем счетчик
+func (h *linkHandler) linkVisitedPlus(w http.ResponseWriter, r *http.Request) {
+	op := "linkHandler.linkVisitedPlus"
+
+	linkID, ok  := request.GetIntFromRequest(r, "id")
+	if !ok {
+		response.WriteError(w, app_errors.BadRequest("Невалидный url", op))
+		return
+	}
+
+	if err := h.service.LinkVisitedPlus(r.Context(), linkID); err != nil {
+		response.WriteError(w, err)
+		return
+	}
+
+	response.WriteSuccess(w, nil)
+}

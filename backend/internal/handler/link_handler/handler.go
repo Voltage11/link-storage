@@ -30,6 +30,7 @@ func New(r *chi.Mux, service link_service.LinkService, logger logger.AppLogger) 
 		// Link
 		r.Post("/links", h.linkCreate)
 		r.Post("/links/refresh-icon/{id}", h.linkRefreshIcon)
+		r.Post("/links/visited/{id}", h.linkVisitedPlus)
 		//r.Put("/links/{id}", h.linkUpdate)
 		//r.Delete("/links/{id}", h.linkDelete)
 		r.Get("/links", h.linkList)

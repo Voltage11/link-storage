@@ -28,7 +28,7 @@ type LinkResponse struct {
 	Group struct {
 		ID          *int    `json:"id"`
 		Name        *string `json:"name"`
-	} `json:"group,omitempty"`
+	} `json:"link_group,omitempty"`
 	// Group *LinkGroup `json:"group,omitempty"`
 }
 
