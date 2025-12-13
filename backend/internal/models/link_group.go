@@ -16,10 +16,21 @@ type LinkGroup struct {
 	UpdatedAt   time.Time `json:"updated_at"`
 }
 
+// type LinkGroupShortResponse struct {
+// 	ID          int       `json:"id"`
+// 	UserID      int       `json:"user_id"`
+// 	Name        string    `json:"name"`
+// 	Description string    `json:"description"`
+// 	Position    int       `json:"position"`
+// 	Color       string    `json:"color"`
+// 	CreatedAt   time.Time `json:"created_at"`
+// 	UpdatedAt   time.Time `json:"updated_at"`
+// }
+
 type LinkGroupCreate struct {
 	Name        string `json:"name"`
-	Description string `json:"description"`
-	Color       string `json:"color"`
+	Description string `json:"description,omitempty"`
+	Color       string `json:"color,omitempty"`
 }
 
 func (lc *LinkGroupCreate) Validate() error {

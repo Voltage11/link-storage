@@ -58,7 +58,7 @@ func main() {
 
 	// Services
 	authService := auth_service.New(authRepo, appLogger, cfg.Secret.Jwt)
-	linkService := link_service.New(linkRepo, appLogger)
+	linkService := link_service.New(linkRepo, appLogger, cfg.Media.FavIconsPath)
 
 	// Server
 	router := chi.NewRouter()

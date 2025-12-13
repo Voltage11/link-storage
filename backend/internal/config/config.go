@@ -34,6 +34,9 @@ type Config struct {
 		}
 	}
 	LogLevel string `env:"LOG_LEVEL" env-default:"info"`
+	Media    struct {
+		FavIconsPath string `env:"ICONS_DIR" env-default:"./media/favicons"`
+	}
 }
 
 func New() (*Config, error) {
@@ -59,6 +62,14 @@ func New() (*Config, error) {
 	// Валидация дополнительных правил
 	if err := instance.validate(); err != nil {
 		return nil, fmt.Errorf("ошибка валидации значений переменных окружения: %w", err)
+	}
+
+	// Проверка существования директории с иконками, если отсутствует - создаем
+	if _, err := os.Stat(instance.Media.FavIconsPath); os.IsNotExist(err) {
+		err = os.MkdirAll(instance.Media.FavIconsPath, os.ModePerm)
+		if err != nil {
+			return nil, fmt.Errorf("ошибка создания директории с иконками: %w", err)
+		}
 	}
 
 	return instance, nil

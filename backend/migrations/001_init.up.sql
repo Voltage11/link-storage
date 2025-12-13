@@ -26,7 +26,7 @@ CREATE TABLE users
     password_hashed  VARCHAR(255) NOT NULL,
     is_active      BOOLEAN      NOT NULL DEFAULT false,
     is_admin       BOOLEAN      NOT NULL DEFAULT false,
-    last_login_at  TIMESTAMPTZ,
+    last_login_at  TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     created_at     TIMESTAMPTZ  NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at     TIMESTAMPTZ  NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
@@ -41,7 +41,7 @@ CREATE TABLE sessions
     id            SERIAL PRIMARY KEY,
     user_id       INTEGER             NOT NULL REFERENCES users (id) ON DELETE CASCADE,
     refresh_token VARCHAR(1000) UNIQUE NOT NULL,
-    user_agent    TEXT,
+    user_agent    TEXT DEFAULT '',
     ip_address    VARCHAR(50),
     expired_at    TIMESTAMPTZ         NOT NULL,
     created_at    TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
@@ -58,9 +58,9 @@ CREATE TABLE link_groups(
     id SERIAL PRIMARY KEY,
     user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     name VARCHAR(50) NOT NULL,
-    description TEXT,
+    description TEXT DEFAULT '',
     position INTEGER DEFAULT 0,
-    color VARCHAR(7),
+    color VARCHAR(7) DEFAULT '',
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
@@ -73,14 +73,14 @@ CREATE TABLE links (
     user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     link_group_id INTEGER REFERENCES link_groups(id) ON DELETE SET NULL,
     url TEXT NOT NULL,
-    title VARCHAR(500),
-    description TEXT,
-    favicon_url TEXT,
-    preview_image TEXT,
+    title VARCHAR(500) DEFAULT '',
+    description TEXT DEFAULT '',
+    favicon_url TEXT DEFAULT '',
+    preview_image TEXT DEFAULT '',
     is_archived BOOLEAN DEFAULT FALSE,
     is_favorite BOOLEAN DEFAULT FALSE,
     click_count INTEGER DEFAULT 0,
-    last_visited TIMESTAMP,
+    last_visited TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
@@ -93,7 +93,7 @@ CREATE TABLE tags (
     id SERIAL PRIMARY KEY,
     user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     name VARCHAR(50) NOT NULL,
-    color VARCHAR(7),
+    color VARCHAR(7) DEFAULT '',
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );

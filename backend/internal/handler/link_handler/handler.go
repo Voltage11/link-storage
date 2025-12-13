@@ -21,10 +21,17 @@ func New(r *chi.Mux, service link_service.LinkService, logger logger.AppLogger) 
 	}
 
 	r.Route("/api/v1", func(r chi.Router) {
+		// LinkGroup
 		r.Use(httprate.LimitByIP(5, 1*time.Second))
 		r.Post("/link-groups", h.linkGroupCreate)
 		r.Put("/link-groups/{id}", h.linkGroupUpdate)
 		r.Delete("/link-groups/{id}", h.linkGroupDelete)
 		r.Get("/link-groups", h.linkGroupList)
+		// Link
+		r.Post("/links", h.linkCreate)
+		r.Post("/links/refresh-icon/{id}", h.linkRefreshIcon)
+		//r.Put("/links/{id}", h.linkUpdate)
+		//r.Delete("/links/{id}", h.linkDelete)
+		r.Get("/links", h.linkList)
 	})
 }

@@ -23,6 +23,17 @@ func (r *linkRepository) CreateLinkGroup(ctx context.Context, linkGroup *models.
 		RETURNING id
 	`
 
+	queryMaxPosition := `
+		SELECT coalesce(MAX(position), 0) + 1 AS position
+		FROM link_groups
+		WHERE user_id = $1
+	`
+
+	if err := r.pool.QueryRow(ctx, queryMaxPosition, linkGroup.UserID).Scan(&linkGroup.Position); err != nil {
+		r.logger.Error(err, op)
+		return app_errors.HandleDBError(err, "получение максимальной позиции группы ссылок", op)
+	}
+
 	if err := r.pool.QueryRow(ctx, query, linkGroup.UserID, linkGroup.Name, linkGroup.Description, linkGroup.Position, linkGroup.Color, linkGroup.CreatedAt, linkGroup.UpdatedAt).Scan(&linkGroup.ID); err != nil {
 		return app_errors.HandleDBError(err, "добавление группы ссылок", op)
 	}
