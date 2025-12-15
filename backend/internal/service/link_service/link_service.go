@@ -21,6 +21,7 @@ type LinkService interface {
 	LinkRefreshIcon(ctx context.Context, linkID int) (*models.Link, error)
 	GetLinksByUserIDWithPagination(ctx context.Context, linkGroupID, page, pageSize int, name string) (*response.ListResponse[models.LinkResponse], error)
 	LinkVisitedPlus(ctx context.Context, linkID int) error
+	GetLinksTopVisited(ctx context.Context) ([]*models.Link, error)
 	//GetLinkByID(ctx context.Context, id, userID int) (*models.Link, error)
 	//UpdateLink(ctx context.Context, linkUpdate *models.LinkUpdate) (*models.Link, error)
 	//DeleteLink(ctx context.Context, id int) error

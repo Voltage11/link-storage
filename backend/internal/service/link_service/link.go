@@ -10,6 +10,10 @@ import (
 	"link-storage/pkg/utils/parseurl"
 )
 
+const (
+	defaultTopVisitedCount = 10
+)
+
 func (s *linkService) CreateLink(ctx context.Context, linkCreate *models.LinkCreate) (*models.Link, error) {
 	op := "link_service.CreateLink"
 
@@ -149,4 +153,14 @@ func (s *linkService) LinkVisitedPlus(ctx context.Context, linkID int) error {
 	}
 
 	return s.repo.LinkVisitedPlus(ctx, linkID)
+}
+
+func (s *linkService) GetLinksTopVisited(ctx context.Context) ([]*models.Link, error) {
+	op := "link_service.GetLinksTopVisited"
+	
+	user := middleware.GetCurrentUserFromContext(ctx)
+	if user == nil {
+		return nil, app_errors.Unauthorized(op)
+	}
+	return s.repo.GetLinksTopVisited(ctx, user.ID, defaultTopVisitedCount)
 }

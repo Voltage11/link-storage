@@ -172,11 +172,10 @@ func (r *linkRepository) GetLinksByUserIDWithPagination(ctx context.Context, use
 			&link.LastVisited,
 			&link.CreatedAt,
 			&link.UpdatedAt,
-			&link.Group.ID,	
+			&link.Group.ID,
 			&link.Group.Name); err != nil {
 			return nil, app_errors.HandleDBError(err, "получение ссылок", op)
 		}
-		
 
 		links = append(links, &link)
 	}
@@ -222,4 +221,49 @@ func (r *linkRepository) LinkVisitedPlus(ctx context.Context, linkID int) error 
 	}
 
 	return nil
+}
+
+func (r *linkRepository) GetLinksTopVisited(ctx context.Context, userID, limit int) ([]*models.Link, error) {
+	op := "link_repository.GetLinksTopVisited"
+
+	query := `
+		SELECT id, user_id, link_group_id, url, title, description, favicon_url, preview_image, is_archived, is_favorite, click_count, last_visited, created_at, updated_at
+		FROM links
+		WHERE user_id = $1 AND
+			  click_count > 0 AND
+			  is_archived = false
+		ORDER BY click_count DESC
+		LIMIT $2
+	`
+	var links []*models.Link
+
+	result, err := r.pool.Query(ctx, query, userID, limit)
+	if err != nil {
+		r.logger.Error(err, op)
+		return nil, app_errors.HandleDBError(err, "получение топа посещаемых ссылок", op)
+	}
+
+	for result.Next() {
+		var link models.Link
+		if err := result.Scan(
+					&link.ID,
+					&link.UserID,
+					&link.LinkGroupID,
+					&link.URL,
+					&link.Title,
+					&link.Description,
+					&link.FaviconURL,
+					&link.PreviewImage,
+					&link.IsArchived,
+					&link.IsFavorite,
+					&link.ClickCount,
+					&link.LastVisited,
+					&link.CreatedAt,
+					&link.UpdatedAt,); err != nil {
+						r.logger.Error(err, op)
+			return nil, app_errors.HandleDBError(err, "получение топа посещаемых ссылок", op)
+		}
+		links = append(links, &link)
+	}
+	return links, nil
 }

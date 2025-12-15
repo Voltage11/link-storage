@@ -25,6 +25,7 @@ type LinkRepository interface {
 	SetLinkFavIconAndTitle(ctx context.Context, linkID int, favIconPath, title string) error
 	GetLinksByUserIDWithPagination(ctx context.Context, userID, linkGroupID, limit, offset int, name string) (*response.ListResponse[models.LinkResponse], error)
 	LinkVisitedPlus(ctx context.Context, linkID int) error
+	GetLinksTopVisited(ctx context.Context, userID, limit int) ([]*models.Link, error)
 }
 
 type linkRepository struct {

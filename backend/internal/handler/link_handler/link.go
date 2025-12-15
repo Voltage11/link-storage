@@ -35,7 +35,6 @@ func (h *linkHandler) linkCreate(w http.ResponseWriter, r *http.Request) {
 
 }
 
-
 func (h *linkHandler) linkRefreshIcon(w http.ResponseWriter, r *http.Request) {
 	op := "linkHandler.linkRefreshIcon"
 
@@ -76,7 +75,7 @@ func (h *linkHandler) linkList(w http.ResponseWriter, r *http.Request) {
 func (h *linkHandler) linkVisitedPlus(w http.ResponseWriter, r *http.Request) {
 	op := "linkHandler.linkVisitedPlus"
 
-	linkID, ok  := request.GetIntFromRequest(r, "id")
+	linkID, ok := request.GetIntFromRequest(r, "id")
 	if !ok {
 		response.WriteError(w, app_errors.BadRequest("Невалидный url", op))
 		return
@@ -88,4 +87,19 @@ func (h *linkHandler) linkVisitedPlus(w http.ResponseWriter, r *http.Request) {
 	}
 
 	response.WriteSuccess(w, nil)
+}
+
+func (h *linkHandler) getLinkTopVisited(w http.ResponseWriter, r *http.Request) {
+	links, err := h.service.GetLinksTopVisited(r.Context())
+	if err != nil {
+		response.WriteError(w, err)
+		return
+	}
+
+	if links == nil {
+		response.WriteSuccess(w, []models.Link{})
+		return
+	}
+
+	response.WriteSuccess(w, links)
 }
